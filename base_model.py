@@ -2,7 +2,7 @@ import transformers
 import torch
 import torch.nn as nn
 from typing import Dict
-import scalar_mix
+#import scalar_mix
 
 
 class BaseModel(nn.Module):
@@ -42,8 +42,8 @@ class BaseModel(nn.Module):
             self.max_layer = self.num_layers
 
         # Configure scalar mixing, ELMo-style.
-        if output_mode == "mix":
-            self.scalar_mix = scalar_mix.ScalarMix(self.max_layer + 1, do_layer_norm=False)
+        #if output_mode == "mix":
+        #    self.scalar_mix = scalar_mix.ScalarMix(self.max_layer + 1, do_layer_norm=False)
 
     def correct_sent_indexing(self, sent):
         """ Correct id difference between transformers and AllenNLP.

@@ -102,7 +102,7 @@ class EdgeClassifierModule(nn.Module):
         else:
             raise ValueError("Unsupported loss type '%s' " "for edge probing." % self.loss_type)
 
-    def compute_loss(self, logits: torch.Tensor, labels: torch.Tensor, task):
+    def compute_loss(self, logits: torch.Tensor, labels: torch.Tensor, task:str):
         """ Compute loss & eval metrics.
         Expect logits and labels to be already "selected" for good targets,
         i.e. this function does not do any masking internally.
