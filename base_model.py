@@ -157,7 +157,10 @@ class BaseModel(nn.Module):
         #    lex_seq = self.model.embeddings.LayerNorm(lex_seq)
         if self.output_mode != "only":
             #oken_types = self.get_seg_ids(ids, input_mask)
-            _, output_pooled_vec, hidden_states = self.model(sent)
+            _, output_pooled_vec, hidden_states = self.model(
+                input_ids=sent['input_ids'],
+                token_type_ids=sent['token_type_ids'],
+                attention_mask=sent['attention_mask'])
         return self.prepare_output(lex_seq, hidden_states, sent['attention_mask'])
 
     def get_pretrained_lm_head(self):
