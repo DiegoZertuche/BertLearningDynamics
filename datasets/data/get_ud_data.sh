@@ -4,8 +4,6 @@ TARGET_DIR=$1
 
 THIS_DIR=$(realpath $(dirname $0))
 
-THIS_DIR=$(get_abs_filename)
-
 set -e
 if [ ! -d $TARGET_DIR ]; then
   mkdir $TARGET_DIR

@@ -1,5 +1,6 @@
 attrs==19.3.0
 bs4==0.0.1
+conllu==4.4.1
 jsonnet==0.15.0
 lxml==4.6.3
 datasets==1.1.2

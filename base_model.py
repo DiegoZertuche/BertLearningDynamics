@@ -151,16 +151,14 @@ class BaseModel(nn.Module):
 
     def forward(self, sent): #TODO: MODIFY
         #ids, input_mask = self.correct_sent_indexing(sent)
-        #hidden_states, lex_seq = [], None
+        hidden_states, lex_seq = [], None
         #if self.output_mode not in ["none", "top"]:
         #    lex_seq = self.model.embeddings.word_embeddings(ids)
         #    lex_seq = self.model.embeddings.LayerNorm(lex_seq)
         if self.output_mode != "only":
-            token_types = self.get_seg_ids(ids, input_mask)
-            _, output_pooled_vec, hidden_states = self.model(
-                ids, token_type_ids=token_types, attention_mask=input_mask
-            )
-        return self.prepare_output(lex_seq, hidden_states, input_mask)
+            #oken_types = self.get_seg_ids(ids, input_mask)
+            _, output_pooled_vec, hidden_states = self.model(sent)
+        return self.prepare_output(lex_seq, hidden_states, sent['attention_mask'])
 
     def get_pretrained_lm_head(self):
         model_with_lm_head = transformers.BertForMaskedLM.from_pretrained(
