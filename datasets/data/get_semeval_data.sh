@@ -32,16 +32,16 @@ fetch_data
 # Convert SemEval to edge probing format.
 TRAIN_SOURCE="$TARGET_DIR/raw/SemEval2010_task8_all_data/SemEval2010_task8_training/TRAIN_FILE.TXT"
 TEST_SOURCE="$TARGET_DIR/raw/SemEval2010_task8_all_data/SemEval2010_task8_testing_keys/TEST_FILE_FULL.TXT"
-python $THIS_DIR/helper/convert-semeval2010-task8.py -i "${TRAIN_SOURCE}" \
+python data/helper/convert-semeval2010-task8.py -i "${TRAIN_SOURCE}" \
     -o "$TARGET_DIR/train.all.json"
-python $THIS_DIR/helper/convert-semeval2010-task8.py -i "${TEST_SOURCE}" \
+python data/helper/convert-semeval2010-task8.py -i "${TEST_SOURCE}" \
     -o "$TARGET_DIR/test.json"
 
 # SemEval 2010 doesn't have an official development set,
 # so create one by a (deterministic) random sample of the training data.
-python $THIS_DIR/helper/deterministic_split.py \
+python data/helper/deterministic_split.py \
     -s 42 -f 0.85 -i "${TARGET_DIR}/train.all.json" \
     -o "${TARGET_DIR}/train.0.85.json" "${TARGET_DIR}/dev.json"
 
 # Print dataset stats for sanity-check.
-python $THIS_DIR/helper/edge_data_stats.py -i $TARGET_DIR/*.json
+python data/helper/edge_data_stats.py -i $TARGET_DIR/*.json

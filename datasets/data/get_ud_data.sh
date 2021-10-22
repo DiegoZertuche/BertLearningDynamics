@@ -27,9 +27,9 @@ function fetch_data() {
 fetch_data
 
 # Convert UD to edge probing format.
-python $THIS_DIR/helper/ud_to_json.py \
+python data/helper/ud_to_json.py \
   -i $TARGET_DIR/raw/ud/UD_English-EWT-r2.2/en_ewt-ud-*.conllu \
   -o $TARGET_DIR
 
 # Print dataset stats for sanity-check.
-python $THIS_DIR/helper/edge_data_stats.py -i $TARGET_DIR/*.json
+python data/helper/edge_data_stats.py -i $TARGET_DIR/*.json

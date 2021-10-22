@@ -2,7 +2,7 @@ import transformers
 import torch
 import torch.nn as nn
 from typing import Dict
-#import scalar_mix
+from allennlp import ScalarMix
 
 
 class BaseModel(nn.Module):
@@ -11,11 +11,11 @@ class BaseModel(nn.Module):
     APIs from transfromers.
     """
 
-    def __init__(self, input_module: str, transfer_mode: str, output_mode: str, max_layer: int=-1):
+    def __init__(self, params):
         super().__init__()
-        self.input_module = input_module
-        self.transfer_mode = transfer_mode
-        self.output_mode = output_mode
+        self.input_module = params['input_module']
+        self.transfer_mode = params['transfer_mode']
+        self.output_mode = params['output_mode']
         self.model = transformers.BertModel.from_pretrained(self.input_module, output_hidden_states=True)
         self.max_pos = self.model.config.max_position_embeddings
         self.tokenizer = transformers.BertTokenizer.from_pretrained(self.input_module)
@@ -27,7 +27,7 @@ class BaseModel(nn.Module):
         self._unk_id = self.tokenizer.convert_tokens_to_ids("[UNK]")
         self._mask_id = self.tokenizer.convert_tokens_to_ids("[MASK]")
 
-        self.parameter_setup(self.transfer_mode, max_layer, self.output_mode)
+        self.parameter_setup(self.transfer_mode, params['max_layer'], self.output_mode)
 
     def parameter_setup(self, transfer_mode, max_layer, output_mode):
         # Set trainability of this module.
@@ -42,8 +42,8 @@ class BaseModel(nn.Module):
             self.max_layer = self.num_layers
 
         # Configure scalar mixing, ELMo-style.
-        #if output_mode == "mix":
-        #    self.scalar_mix = scalar_mix.ScalarMix(self.max_layer + 1, do_layer_norm=False)
+        if output_mode == "mix":
+            self.scalar_mix = ScalarMix(self.max_layer + 1, do_layer_norm=False)
 
     def correct_sent_indexing(self, sent):
         """ Correct id difference between transformers and AllenNLP.
@@ -157,11 +157,12 @@ class BaseModel(nn.Module):
         #    lex_seq = self.model.embeddings.LayerNorm(lex_seq)
         if self.output_mode != "only":
             #oken_types = self.get_seg_ids(ids, input_mask)
-            _, output_pooled_vec, hidden_states = self.model(
+            outs = self.model(
                 input_ids=sent['input_ids'],
                 token_type_ids=sent['token_type_ids'],
                 attention_mask=sent['attention_mask'])
-        return self.prepare_output(lex_seq, hidden_states, sent['attention_mask'])
+
+        return self.prepare_output(lex_seq, outs.hidden_states, sent['attention_mask'])
 
     def get_pretrained_lm_head(self):
         model_with_lm_head = transformers.BertForMaskedLM.from_pretrained(
