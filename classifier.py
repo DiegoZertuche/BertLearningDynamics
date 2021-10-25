@@ -46,5 +46,5 @@ class Classifier(nn.Module):
             n_classes,
             cls_type=params["cls_type"],
             dropout=params["dropout"],
-            d_hid=params["d_hid"],
+            d_hid=params["d_hidden"],
         )

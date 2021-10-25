@@ -2,7 +2,7 @@ import transformers
 import torch
 import torch.nn as nn
 from typing import Dict
-from allennlp import ScalarMix
+from allennlp_mod import ScalarMix
 
 
 class BaseModel(nn.Module):

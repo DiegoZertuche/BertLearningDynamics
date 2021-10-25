@@ -21,7 +21,6 @@
 
 set -eux
 
-
 TARGET_DIR=$1
 OUTPUT_DIR="${TARGET_DIR}/edges"
 echo $OUTPUT_DIR
@@ -33,12 +32,14 @@ function preproc_task() {
     # Extract data labels.
     python $HERE/get_edge_data_labels.py -o $TASK_DIR/labels.txt \
       -i $TASK_DIR/*.json -s
-
     # Retokenize for each tokenizer we need.
+    #python $HERE/retokenize_edge_data.py -t "MosesTokenizer" $TASK_DIR/*.json
+    #python $HERE/retokenize_edge_data.py -t "OpenAI.BPE"     $TASK_DIR/*.json
     python $HERE/retokenize_edge_data.py -t "bert-base-uncased"  $TASK_DIR/*.json
+    #python $HERE/retokenize_edge_data.py -t "bert-large-uncased" $TASK_DIR/*.json
 
     # Convert the original version to tfrecord.
-    python $HERE/convert_edge_data_to_tfrecord.py $TASK_DIR/*.json
+    #python $HERE/convert_edge_data_to_tfrecord.py $TASK_DIR/*.json
 }
 
 function get_ontonotes() {
@@ -89,9 +90,8 @@ function get_ud() {
     ## Universal Dependencies
     ## Gives dep_ewt/en_ewt-ud-{split}.json, where split = {train, dev, test}
     # TODO: standardize filenames!
-    mkdir $OUTPUT_DIR/dep_ewt
     bash $HERE/data/get_ud_data.sh $OUTPUT_DIR/dep_ewt
-    #preproc_task $OUTPUT_DIR/dep_ewt
+    preproc_task $OUTPUT_DIR/dep_ewt
 }
 
 function get_semeval() {
@@ -99,11 +99,12 @@ function get_semeval() {
     ## Gives semeval/{split}.json, where split = {train.0.85, dev, test}
     mkdir $OUTPUT_DIR/semeval
     bash $HERE/data/get_semeval_data.sh $OUTPUT_DIR/semeval
-    #preproc_task $OUTPUT_DIR/semeval
+    preproc_task $OUTPUT_DIR/semeval
 }
 
 #get_ontonotes
 #get_spr_dpr
 get_ud
+
 get_semeval
 

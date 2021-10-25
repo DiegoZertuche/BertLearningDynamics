@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from allennlp import SelfAttentiveSpanExtractor
+from allennlp_mod import SelfAttentiveSpanExtractor
 from classifier import Classifier
+import numpy as np
 
 
 class EdgeClassifierModule(nn.Module):
@@ -32,12 +33,22 @@ class EdgeClassifierModule(nn.Module):
         self.proj_dim = task_params["d_hidden"]
         self.n_spans = task_params['n_spans']
         self.n_classes = task_params['n_classes']
+        self.loss_type = 'sigmoid'
 
         # Span extractor, shared for both span1 and span2.
         self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim)
-        self.classifier = Classifier.from_params(self.proj_dim*self.n_spans, self.n_classes)
+        self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim)
+        self.classifier = Classifier.from_params(self.proj_dim*self.n_spans, self.n_classes, task_params)
 
-    def forward(self, batch, sent_mask, task, predict):
+    def label_processing(self, labels):
+        binary_labels = []
+        for label_id in labels:
+            binary_label_ids = np.zeros((self.n_classes,), dtype=int)
+            binary_label_ids[label_id] = 1
+            binary_labels.append(binary_label_ids)
+        return torch.tensor(binary_labels)
+
+    def forward(self, batch, sent_mask, predict):
         """ Run forward pass.
         Expects batch to have the following entries:
             'batch1' : [batch_size, max_len, ??]
@@ -48,7 +59,6 @@ class EdgeClassifierModule(nn.Module):
         (num_targets) dimension.
         Args:
             batch: dict(str -> Tensor) with entries described above.
-            word_embs_in_context: [batch_size, max_len, repr_dim] Tensor
             sent_mask: [batch_size, max_len, 1] Tensor of {0,1}
             task: EdgeProbingTask
             predict: whether or not to generate predictions
@@ -67,23 +77,24 @@ class EdgeClassifierModule(nn.Module):
 
         _kw = dict(sequence_mask=sent_mask.long(), span_indices_mask=span_mask.long())
         # span1_emb and span2_emb are [batch_size, num_targets, span_repr_dim]
-        span1_emb = self.span_extractors[1](se_proj1, batch["span1s"], **_kw)
-        if not self.single_sided:
-            span2_emb = self.span_extractors[2](se_proj2, batch["span2s"], **_kw)
-            span_emb = torch.cat([span1_emb, span2_emb], dim=2)
-        else:
-            span_emb = span1_emb
+        span1_embeddings = self.span_attention_extractor(batch['batch1'], batch["span1s"])
+        span2_embeddings = self.span_attention_extractor_2(batch['batch1'], batch["span2s"])
 
-        # [batch_size, num_targets, n_classes]
-        logits = self.classifier(span_emb)
+        span_embeddings = torch.cat([span1_embeddings, span2_embeddings], dim=-1)
+        masked_span_embeddings = span_embeddings[span_mask, :]
+        masked_labels = batch['labels'][span_mask]
+
+        logits = self.classifier(masked_span_embeddings)
         out["logits"] = logits
+        binary_labels = self.label_processing(masked_labels)
+        out["labels"] = binary_labels
 
         # Compute loss if requested.
         if "labels" in batch:
             # Labels is [batch_size, num_targets, n_classes],
             # with k-hot encoding provided by AllenNLP's MultiLabelField.
             # Flatten to [total_num_targets, ...] first.
-            out["loss"] = self.compute_loss(logits[span_mask], batch["labels"][span_mask], task)
+            out["loss"] = self.compute_loss(logits, binary_labels)
 
         if predict:
             out["preds"] = self.get_predictions(logits)
@@ -102,7 +113,7 @@ class EdgeClassifierModule(nn.Module):
         else:
             raise ValueError("Unsupported loss type '%s' " "for edge probing." % self.loss_type)
 
-    def compute_loss(self, logits: torch.Tensor, labels: torch.Tensor, task:str):
+    def compute_loss(self, logits: torch.Tensor, labels: torch.Tensor):
         """ Compute loss & eval metrics.
         Expect logits and labels to be already "selected" for good targets,
         i.e. this function does not do any masking internally.

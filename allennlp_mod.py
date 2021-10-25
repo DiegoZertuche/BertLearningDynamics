@@ -50,7 +50,6 @@ class SelfAttentiveSpanExtractor(nn.Module):
     ) -> torch.FloatTensor:
         # both of shape (batch_size, num_spans, 1)
         span_starts, span_ends = span_indices.split(1, dim=-1)
-
         # shape (batch_size, num_spans, 1)
         # These span widths are off by 1, because the span ends are `inclusive`.
         span_widths = span_ends - span_starts

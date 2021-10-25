@@ -11,20 +11,17 @@
 # Note that OntoNotes is rather large and we need to process it several times, so
 # this script can take a while to run.
 
-#JIANT_DATA_DIR=${1:-"$HOME/glue_data"}  # path to glue_data directory
+JIANT_DATA_DIR=${1:-"$HOME/glue_data"}  # path to glue_data directory
 
 ## Configure these for your environment ##
-#PATH_TO_ONTONOTES="/nfs/jsalt/home/iftenney/ontonotes/ontonotes/conll-formatted-ontonotes-5.0"
-#PATH_TO_SPR1_RUDINGER="/nfs/jsalt/home/iftenney/decomp.net/spr1"
+PATH_TO_ONTONOTES="/nfs/jsalt/home/iftenney/ontonotes/ontonotes/conll-formatted-ontonotes-5.0"
+PATH_TO_SPR1_RUDINGER="/nfs/jsalt/home/iftenney/decomp.net/spr1"
 
 ## Don't modify below this line. ##
 
 set -eux
 
-
-TARGET_DIR=$1
-OUTPUT_DIR="${TARGET_DIR}/edges"
-echo $OUTPUT_DIR
+OUTPUT_DIR="${JIANT_DATA_DIR}/edges"
 mkdir -p $OUTPUT_DIR
 HERE=$(dirname $0)
 
@@ -33,9 +30,11 @@ function preproc_task() {
     # Extract data labels.
     python $HERE/get_edge_data_labels.py -o $TASK_DIR/labels.txt \
       -i $TASK_DIR/*.json -s
-
     # Retokenize for each tokenizer we need.
+    python $HERE/retokenize_edge_data.py -t "MosesTokenizer" $TASK_DIR/*.json
+    python $HERE/retokenize_edge_data.py -t "OpenAI.BPE"     $TASK_DIR/*.json
     python $HERE/retokenize_edge_data.py -t "bert-base-uncased"  $TASK_DIR/*.json
+    python $HERE/retokenize_edge_data.py -t "bert-large-uncased" $TASK_DIR/*.json
 
     # Convert the original version to tfrecord.
     python $HERE/convert_edge_data_to_tfrecord.py $TASK_DIR/*.json
@@ -89,9 +88,8 @@ function get_ud() {
     ## Universal Dependencies
     ## Gives dep_ewt/en_ewt-ud-{split}.json, where split = {train, dev, test}
     # TODO: standardize filenames!
-    mkdir $OUTPUT_DIR/dep_ewt
     bash $HERE/data/get_ud_data.sh $OUTPUT_DIR/dep_ewt
-    #preproc_task $OUTPUT_DIR/dep_ewt
+    preproc_task $OUTPUT_DIR/dep_ewt
 }
 
 function get_semeval() {
@@ -99,11 +97,12 @@ function get_semeval() {
     ## Gives semeval/{split}.json, where split = {train.0.85, dev, test}
     mkdir $OUTPUT_DIR/semeval
     bash $HERE/data/get_semeval_data.sh $OUTPUT_DIR/semeval
-    #preproc_task $OUTPUT_DIR/semeval
+    preproc_task $OUTPUT_DIR/semeval
 }
 
-#get_ontonotes
-#get_spr_dpr
+get_ontonotes
+get_spr_dpr
 get_ud
+
 get_semeval
 
