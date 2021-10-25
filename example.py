@@ -67,7 +67,6 @@ val_acc = []
 n_epochs = 10
 for epoch in range(n_epochs):
     running_loss = 0
-    acc_scorer.reset()
     f1_scorer.reset()
     for batch in tqdm(train_dl, leave=False):
         outs = model(batch, True)
