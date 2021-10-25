@@ -48,7 +48,7 @@ class EdgeClassifierModule(nn.Module):
             binary_labels.append(binary_label_ids)
         return torch.tensor(binary_labels)
 
-    def forward(self, batch, sent_mask, predict):
+    def forward(self, batch, sent_mask, predict, is_cuda):
         """ Run forward pass.
         Expects batch to have the following entries:
             'batch1' : [batch_size, max_len, ??]
@@ -86,7 +86,10 @@ class EdgeClassifierModule(nn.Module):
 
         logits = self.classifier(masked_span_embeddings)
         out["logits"] = logits
-        binary_labels = self.label_processing(masked_labels)
+        if is_cuda:
+            binary_labels = self.label_processing(masked_labels).to('cuda')
+        else:
+            binary_labels = self.label_processing(masked_labels)
         out["labels"] = binary_labels
 
         # Compute loss if requested.

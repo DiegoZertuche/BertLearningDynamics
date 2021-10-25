@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from preprocess import MyDataset
 from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
-from allennlp.training.metrics import F1Measure, BooleanAccuracy
+from allennlp.training.metrics import F1MultiLabelMeasure
 import numpy as np
 
 params = {
@@ -63,8 +63,7 @@ train_dl = DataLoader(train_ds, batch_size=32, shuffle=True, drop_last=True, col
 dev_dl = DataLoader(dev_ds, batch_size=32, shuffle=True, drop_last=True, collate_fn=pad_collate)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.001)
-f1_scorer = F1Measure(positive_label=1)
-acc_scorer = BooleanAccuracy()
+f1_scorer = F1MultiLabelMeasure(average="micro")
 
 train_losses = []
 test_losses = []
@@ -76,39 +75,31 @@ val_acc = []
 n_epochs = 10
 for epoch in range(n_epochs):
     running_loss = 0
-    accuracies = []
-    f1s = []
+    acc_scorer.reset()
+    f1_scorer.reset()
     for batch in tqdm(train_dl, leave=False):
         outs = model(batch, True)
         outs['loss'].backward()
         optimizer.step()
         optimizer.zero_grad()
         running_loss += outs['loss'].cpu().item()
-        f1, acc = get_metrics(outs, f1_scorer, acc_scorer)
-        accuracies.append(acc)
-        f1s.append(f1)
+        update_metrics(outs, f1_scorer)
 
     train_losses.append(running_loss)
-    train_acc.append(accuracies)
-    train_f1.append(f1s)
     print("=" * 20)
     print(f"Epoch {epoch + 1}/{n_epochs} Train Loss: {running_loss}")
-    print(f"Epoch {epoch + 1}/{n_epochs} Train Accuracy: {np.mean(accuracies)}")
-    print(f"Epoch {epoch + 1}/{n_epochs} Train F1: {np.mean(f1s)}")
+    print(f"Epoch {epoch + 1}/{n_epochs} Train F1: {f1_scorer.get_metric()}")
 
     running_loss = 0
-    accuracies_val = []
-    f1s_val = []
+    f1_scorer.reset()
     with torch.no_grad():
         for batch in tqdm(dev_dl, leave=False):
             outs = model(batch, True)
             running_loss += outs['loss'].cpu().item()
-            f1_val, acc_val = get_metrics(outs, f1_scorer, acc_scorer)
-            accuracies.append(acc_val)
-            f1s.append(f1_val)
+            update_metrics(outs, f1_scorer)
 
-    print(f"Epoch {epoch + 1}/{n_epochs} Train Accuracy: {np.mean(accuracies_val)}")
-    print(f"Epoch {epoch + 1}/{n_epochs} Train F1: {np.mean(f1s_val)}")
+    print(f"Epoch {epoch + 1}/{n_epochs} Val Loss: {running_loss}")
+    print(f"Epoch {epoch + 1}/{n_epochs} Val Metrics: {f1_scorer.get_metric()}")
 
 #write_pickle(f'{PARENT_DIR}model-w2v.pk', model)
 print('DONE')

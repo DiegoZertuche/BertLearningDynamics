@@ -23,10 +23,10 @@ class MainModel(nn.Module):
             hidden_states = self.encoder(batch[0].to('cuda'))
             batch_ = {'batch1': hidden_states, 'span1s': batch[1].to('cuda'), 'span2s': batch[2].to('cuda'),
                       'labels': batch[3].to('cuda')}
-            outs = self.head(batch_, batch[0]['attention_mask'].to('cuda'), predict)
+            outs = self.head(batch_, batch[0]['attention_mask'].to('cuda'), predict, self.is_cuda)
         else:
             hidden_states = self.encoder(batch[0])
             batch_ = {'batch1': hidden_states, 'span1s': batch[1], 'span2s': batch[2],
                       'labels': batch[3]}
-            outs = self.head(batch_, batch[0]['attention_mask'], predict)
+            outs = self.head(batch_, batch[0]['attention_mask'], predict, self.is_cuda)
         return outs
