@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from overrides import overrides
-from allennlp_mod.modules.attention import Attention
+from allennlp.modules.attention import Attention
 
 
 @Attention.register("Bahdanau")

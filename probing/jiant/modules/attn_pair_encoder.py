@@ -1,9 +1,9 @@
 # StackedSelfAttentionEncoder
 import torch
-from allennlp_mod.modules import Seq2SeqEncoder
-from allennlp_mod.modules.matrix_attention import DotProductMatrixAttention
-from allennlp_mod.nn import InitializerApplicator, util
-from allennlp_mod.models.model import Model
+from allennlp.modules import Seq2SeqEncoder
+from allennlp.modules.matrix_attention import DotProductMatrixAttention
+from allennlp.nn import InitializerApplicator, util
+from allennlp.models.model import Model
 
 
 class AttnPairEncoder(Model):

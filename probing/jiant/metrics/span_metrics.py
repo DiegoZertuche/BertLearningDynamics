@@ -4,7 +4,7 @@ import re
 
 from typing import List, Dict
 
-from allennlp_mod.training.metrics.metric import Metric
+from allennlp.training.metrics.metric import Metric
 
 
 def normalize_answer(s):

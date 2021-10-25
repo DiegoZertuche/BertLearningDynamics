@@ -1,7 +1,7 @@
 """ Metric class for tracking correlations by saving predictions """
 import numpy as np
 import torch
-from allennlp_mod.training.metrics.metric import Metric
+from allennlp.training.metrics.metric import Metric
 from overrides import overrides
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import confusion_matrix, matthews_corrcoef

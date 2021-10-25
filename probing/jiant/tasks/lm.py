@@ -7,10 +7,10 @@ import random
 import copy
 
 # Fields for instance processing
-from allennlp_mod.data import Instance
-from allennlp_mod.data.token_indexers import SingleIdTokenIndexer
-from allennlp_mod.training.metrics import Average
-from allennlp_mod.data.fields import SequenceLabelField, LabelField
+from allennlp.data import Instance
+from allennlp.data.token_indexers import SingleIdTokenIndexer
+from allennlp.training.metrics import Average
+from allennlp.data.fields import SequenceLabelField, LabelField
 
 from jiant.utils.data_loaders import tokenize_and_truncate, get_tokenizer
 from jiant.tasks.registry import register_task

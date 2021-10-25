@@ -11,14 +11,14 @@ import time
 
 import numpy as np
 import torch
-from allennlp_mod.common import Params  # pylint: disable=import-error
-from allennlp_mod.common.checks import ConfigurationError  # pylint: disable=import-error
-from allennlp_mod.data.iterators import BasicIterator, BucketIterator  # pylint: disable=import-error
-from allennlp_mod.training.learning_rate_schedulers import (  # pylint: disable=import-error
+from allennlp.common import Params  # pylint: disable=import-error
+from allennlp.common.checks import ConfigurationError  # pylint: disable=import-error
+from allennlp.data.iterators import BasicIterator, BucketIterator  # pylint: disable=import-error
+from allennlp.training.learning_rate_schedulers import (  # pylint: disable=import-error
     LearningRateScheduler,
 )
-from allennlp_mod.nn.util import device_mapping
-from allennlp_mod.training.optimizers import Optimizer  # pylint: disable=import-error
+from allennlp.nn.util import device_mapping
+from allennlp.training.optimizers import Optimizer  # pylint: disable=import-error
 from tensorboardX import SummaryWriter  # pylint: disable=import-error
 from torch.nn.utils.clip_grad import clip_grad_norm_
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -34,7 +34,7 @@ from jiant.utils.utils import (
     get_model_attribute,
     uses_cuda,
 )  # pylint: disable=import-error
-from allennlp_mod.nn.util import move_to_device
+from allennlp.nn.util import move_to_device
 
 
 def build_trainer_params(args, cuda_device, task_names, phase="pretrain"):

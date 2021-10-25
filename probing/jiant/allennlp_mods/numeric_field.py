@@ -3,9 +3,9 @@ from typing import Dict, Union
 
 import numpy
 import torch
-from allennlp_mod.common.checks import ConfigurationError
-from allennlp_mod.data.fields.field import Field
-from allennlp_mod.data.vocabulary import Vocabulary
+from allennlp.common.checks import ConfigurationError
+from allennlp.data.fields.field import Field
+from allennlp.data.vocabulary import Vocabulary
 from overrides import overrides
 from torch.autograd import Variable
 

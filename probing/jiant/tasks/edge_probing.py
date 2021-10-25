@@ -7,9 +7,9 @@ import torch
 from typing import Dict, Iterable, List, Sequence, Type
 
 # Fields for instance processing
-from allennlp_mod.data import Instance
-from allennlp_mod.data.fields import ListField, MetadataField, SpanField
-from allennlp_mod.training.metrics import BooleanAccuracy, F1Measure
+from allennlp.data import Instance
+from allennlp.data.fields import ListField, MetadataField, SpanField
+from allennlp.training.metrics import BooleanAccuracy, F1Measure
 
 from jiant.allennlp_mods.correlation import FastMatthews
 from jiant.allennlp_mods.multilabel_field import MultiLabelField

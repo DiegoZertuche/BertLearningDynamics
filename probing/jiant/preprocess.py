@@ -21,8 +21,8 @@ from typing import List, Dict, Union, Any
 
 import numpy as np
 import torch
-from allennlp_mod.data import Vocabulary
-from allennlp_mod.data.token_indexers import (
+from allennlp.data import Vocabulary
+from allennlp.data.token_indexers import (
     ELMoTokenCharactersIndexer,
     SingleIdTokenIndexer,
     TokenCharactersIndexer,

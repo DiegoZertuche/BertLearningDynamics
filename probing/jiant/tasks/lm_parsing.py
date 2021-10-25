@@ -8,9 +8,9 @@ import os
 from typing import Iterable, Type
 
 # Fields for instance processing
-from allennlp_mod.data import Instance
-from allennlp_mod.data.token_indexers import SingleIdTokenIndexer
-from allennlp_mod.training.metrics import Average
+from allennlp.data import Instance
+from allennlp.data.token_indexers import SingleIdTokenIndexer
+from allennlp.training.metrics import Average
 
 from jiant.utils.data_loaders import load_tsv
 from jiant.tasks.lm import AutoregressiveLanguageModelingTask

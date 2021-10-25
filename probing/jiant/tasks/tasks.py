@@ -12,8 +12,8 @@ import torch
 
 
 # Fields for instance processing
-from allennlp_mod.data import Instance, Token, vocabulary
-from allennlp_mod.data.fields import (
+from allennlp.data import Instance, Token, vocabulary
+from allennlp.data.fields import (
     LabelField,
     ListField,
     MetadataField,
@@ -21,8 +21,8 @@ from allennlp_mod.data.fields import (
     SpanField,
     TextField,
 )
-from allennlp_mod.data.token_indexers import SingleIdTokenIndexer
-from allennlp_mod.training.metrics import Average, BooleanAccuracy, CategoricalAccuracy, F1Measure
+from allennlp.data.token_indexers import SingleIdTokenIndexer
+from allennlp.training.metrics import Average, BooleanAccuracy, CategoricalAccuracy, F1Measure
 from sklearn.metrics import mean_squared_error
 
 from jiant.allennlp_mods.correlation import Correlation

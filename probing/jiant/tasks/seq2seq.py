@@ -5,9 +5,9 @@ import math
 import os
 from typing import Iterable, List, Sequence, Type
 
-from allennlp_mod.data import Instance
-from allennlp_mod.data.token_indexers import SingleIdTokenIndexer
-from allennlp_mod.training.metrics import Average, BooleanAccuracy
+from allennlp.data import Instance
+from allennlp.data.token_indexers import SingleIdTokenIndexer
+from allennlp.training.metrics import Average, BooleanAccuracy
 
 from jiant.utils.tokenizers import get_tokenizer
 from ..utils.data_loaders import tokenize_and_truncate

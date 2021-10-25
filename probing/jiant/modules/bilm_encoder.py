@@ -1,4 +1,4 @@
-from allennlp_mod.modules.elmo_lstm import ElmoLstm
+from allennlp.modules.elmo_lstm import ElmoLstm
 
 
 class BiLMEncoder(ElmoLstm):

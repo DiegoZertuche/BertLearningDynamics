@@ -8,13 +8,13 @@
 from typing import Dict
 
 import torch
-from allennlp_mod.common import Params
-from allennlp_mod.common.checks import ConfigurationError
-from allennlp_mod.data import Vocabulary
-from allennlp_mod.modules import Elmo
-from allennlp_mod.modules.text_field_embedders.text_field_embedder import TextFieldEmbedder
-from allennlp_mod.modules.time_distributed import TimeDistributed
-from allennlp_mod.modules.token_embedders.token_embedder import TokenEmbedder
+from allennlp.common import Params
+from allennlp.common.checks import ConfigurationError
+from allennlp.data import Vocabulary
+from allennlp.modules import Elmo
+from allennlp.modules.text_field_embedders.text_field_embedder import TextFieldEmbedder
+from allennlp.modules.time_distributed import TimeDistributed
+from allennlp.modules.token_embedders.token_embedder import TokenEmbedder
 from overrides import overrides
 
 

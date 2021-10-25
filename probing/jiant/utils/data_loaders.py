@@ -8,7 +8,7 @@ import csv
 import json
 import numpy as np
 import pandas as pd
-from allennlp_mod.data import vocabulary
+from allennlp.data import vocabulary
 
 from jiant.utils.tokenizers import get_tokenizer
 from jiant.utils.retokenize import realign_spans

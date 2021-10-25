@@ -11,7 +11,8 @@ import glob
 import torch
 import jsondiff
 
-from allennlp_mod.common.params import Params
+from allennlp.common.checks import ConfigurationError
+from allennlp.common.params import Params
 from sacremoses import MosesDetokenizer
 
 from .config import Params
@@ -164,7 +165,7 @@ def find_last_checkpoint_epoch(serialization_dir, search_phase="pretrain", task_
 
     """
     if not serialization_dir:
-        raise ModuleNotFoundError(
+        raise ConfigurationError(
             "serialization_dir not specified - cannot restore a model without a directory path."
         )
     suffix = None

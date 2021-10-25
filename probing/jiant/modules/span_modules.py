@@ -5,7 +5,7 @@ from typing import Dict, Any
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from allennlp_mod.modules.span_extractors import EndpointSpanExtractor, SelfAttentiveSpanExtractor
+from allennlp.modules.span_extractors import EndpointSpanExtractor, SelfAttentiveSpanExtractor
 
 from jiant.tasks.tasks import Task
 from jiant.modules.simple_modules import Classifier

@@ -5,7 +5,7 @@ import os
 from jiant.utils.data_loaders import load_tsv
 from jiant.tasks.registry import register_task
 from jiant.tasks.tasks import SingleClassificationTask
-from allennlp_mod.training.metrics import CategoricalAccuracy, F1Measure
+from allennlp.training.metrics import CategoricalAccuracy, F1Measure
 
 
 @register_task("acceptability-def", "FunctionWordsProbing/definiteness/")

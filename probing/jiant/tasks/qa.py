@@ -9,9 +9,9 @@ from typing import Iterable, Sequence, Type, Dict
 
 import torch
 import logging as log
-from allennlp_mod.training.metrics import Average, F1Measure, CategoricalAccuracy
-from allennlp_mod.data.fields import LabelField, MetadataField
-from allennlp_mod.data import Instance
+from allennlp.training.metrics import Average, F1Measure, CategoricalAccuracy
+from allennlp.data.fields import LabelField, MetadataField
+from allennlp.data import Instance
 from jiant.allennlp_mods.numeric_field import NumericField
 from jiant.metrics.span_metrics import (
     metric_max_over_ground_truths,

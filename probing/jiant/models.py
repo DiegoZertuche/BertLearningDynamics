@@ -10,12 +10,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from allennlp_mod.common import Params
-from allennlp_mod.modules.seq2seq_encoders import Seq2SeqEncoder as s2s_e
-from allennlp_mod.modules.seq2seq_encoders import StackedSelfAttentionEncoder
-from allennlp_mod.modules.seq2vec_encoders import CnnEncoder
-from allennlp_mod.modules.token_embedders import Embedding, TokenCharactersEncoder
-from allennlp_mod.training.metrics import Average
+from allennlp.common import Params
+from allennlp.modules.seq2seq_encoders import Seq2SeqEncoder as s2s_e
+from allennlp.modules.seq2seq_encoders import StackedSelfAttentionEncoder
+from allennlp.modules.seq2vec_encoders import CnnEncoder
+from allennlp.modules.token_embedders import Embedding, TokenCharactersEncoder
+from allennlp.training.metrics import Average
 from sklearn.metrics import mean_squared_error
 
 from jiant.allennlp_mods.elmo_text_field_embedder import (

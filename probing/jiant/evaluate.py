@@ -9,8 +9,8 @@ from typing import Dict, Iterable, List, Sequence, Tuple
 
 import pandas as pd
 import torch
-from allennlp_mod.nn.util import move_to_device
-from allennlp_mod.data.iterators import BasicIterator
+from allennlp.nn.util import move_to_device
+from allennlp.data.iterators import BasicIterator
 from jiant import tasks as tasks_module
 from jiant.tasks.tasks import (
     BooleanQuestionTask,

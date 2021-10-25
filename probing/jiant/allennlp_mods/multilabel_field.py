@@ -5,9 +5,9 @@ import logging
 from typing import Dict, Optional, Sequence, Set, Union, cast
 
 import torch
-from allennlp_mod.common.checks import ConfigurationError
-from allennlp_mod.data.fields.field import Field
-from allennlp_mod.data.vocabulary import Vocabulary
+from allennlp.common.checks import ConfigurationError
+from allennlp.data.fields.field import Field
+from allennlp.data.vocabulary import Vocabulary
 from overrides import overrides
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

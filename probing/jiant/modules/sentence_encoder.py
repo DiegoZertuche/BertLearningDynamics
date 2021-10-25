@@ -5,11 +5,11 @@ The main component of interest is SentenceEncoder, which all the models use. """
 import torch
 import torch.utils.data
 import torch.utils.data.distributed
-from allennlp_mod.models.model import Model
+from allennlp.models.model import Model
 
 # StackedSelfAttentionEncoder
-from allennlp_mod.nn import InitializerApplicator, util
-from allennlp_mod.modules import Highway, TimeDistributed
+from allennlp.nn import InitializerApplicator, util
+from allennlp.modules import Highway, TimeDistributed
 
 from jiant.tasks.tasks import PairClassificationTask, PairRegressionTask
 from jiant.utils import utils

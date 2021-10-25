@@ -5,7 +5,7 @@ from typing import Dict
 
 import torch
 import torch.nn as nn
-from allennlp_mod.modules import scalar_mix
+from allennlp.modules import scalar_mix
 
 import transformers
 

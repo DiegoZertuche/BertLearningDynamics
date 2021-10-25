@@ -3,8 +3,8 @@ from typing import Optional
 from overrides import overrides
 import torch
 
-from allennlp_mod.common.checks import ConfigurationError
-from allennlp_mod.training.metrics.metric import Metric
+from allennlp.common.checks import ConfigurationError
+from allennlp.training.metrics.metric import Metric
 
 
 @Metric.register("nli_two_class_accuracy")
