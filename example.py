@@ -26,18 +26,10 @@ task_params = {
 model = MainModel(params, task_params)
 
 
-def get_metrics(out, f1_scorer, acc_scorer):
-    logits = out["logits"]
+def update_metrics(out, f1_scorer):
+    preds = out["preds"]
     labels = out["labels"]
-
-    binary_preds = logits.ge(0).long()  # {0,1}
-
-    #Accuracy computed on {0,1} labels.
-    # F1Measure() expects [total_num_targets, n_classes, 2]
-    # to compute binarized F1.
-
-    binary_scores = torch.stack([-1 * logits, logits], dim=2)
-    return f1_scorer(binary_scores, labels), acc_scorer(binary_preds, labels.long())
+    f1_scorer(preds, labels)
 
 
 def tokenize_data(texts):
