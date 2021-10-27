@@ -43,7 +43,7 @@ class BaseModel(nn.Module):
 
         # Configure scalar mixing, ELMo-style.
         if output_mode == "mix":
-            self.scalar_mix = ScalarMix(self.max_layer + 1, do_layer_norm=False)
+            self.scalar_mix = ScalarMix(self.max_layer + 1, do_layer_norm=True)
 
     def correct_sent_indexing(self, sent):
         """ Correct id difference between transformers and AllenNLP.

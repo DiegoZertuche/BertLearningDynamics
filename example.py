@@ -23,7 +23,7 @@ task_params = {
     'dropout': 0.2
 }
 
-model = MainModel(params, task_params)
+model = MainModel(params, task_params, is_cuda=False)
 
 
 def update_metrics(out, f1_scorer):
@@ -58,11 +58,9 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.001)
 f1_scorer = F1MultiLabelMeasure(average="micro")
 
 train_losses = []
-test_losses = []
-train_f1 = []
-val_f1 = []
-train_acc = []
-val_acc = []
+val_losses = []
+train_metrics = []
+val_metrics = []
 
 n_epochs = 10
 for epoch in range(n_epochs):
@@ -77,6 +75,7 @@ for epoch in range(n_epochs):
         update_metrics(outs, f1_scorer)
 
     train_losses.append(running_loss)
+    train_metrics.append(f1_scorer.get_metric())
     print("=" * 20)
     print(f"Epoch {epoch + 1}/{n_epochs} Train Loss: {running_loss}")
     print(f"Epoch {epoch + 1}/{n_epochs} Train F1: {f1_scorer.get_metric()}")
@@ -88,9 +87,14 @@ for epoch in range(n_epochs):
             outs = model(batch, True)
             running_loss += outs['loss'].cpu().item()
             update_metrics(outs, f1_scorer)
-
+    val_losses.append(running_loss)
+    val_metrics.append(f1_scorer.get_metric())
     print(f"Epoch {epoch + 1}/{n_epochs} Val Loss: {running_loss}")
     print(f"Epoch {epoch + 1}/{n_epochs} Val Metrics: {f1_scorer.get_metric()}")
 
-#write_pickle(f'{PARENT_DIR}model-w2v.pk', model)
 print('DONE')
+
+torch.save(model.state_dict(), 'checkpoint/model_dict.pth')
+
+for i in range(12):
+    print(model.encoder.scalar_mix.scalar_parameters[i].item())
