@@ -2,6 +2,7 @@ from typing import Optional, List
 import torch.nn as nn
 import torch
 from torch.nn import ParameterList, Parameter
+import torch_xla.core.xla_model as xm
 
 
 # noinspection PyTypeChecker
@@ -45,8 +46,9 @@ class SelfAttentiveSpanExtractor(nn.Module):
         self,
         sequence_tensor: torch.FloatTensor,
         span_indices: torch.LongTensor,
+        device,
         sequence_mask: torch.LongTensor = None,
-        span_indices_mask: torch.LongTensor = None,
+        span_indices_mask: torch.LongTensor = None
     ) -> torch.FloatTensor:
         # both of shape (batch_size, num_spans, 1)
         span_starts, span_ends = span_indices.split(1, dim=-1)
@@ -66,7 +68,7 @@ class SelfAttentiveSpanExtractor(nn.Module):
 
         # Shape: (1, 1, max_batch_span_width)
         max_span_range_indices = get_range_vector(
-            max_batch_span_width, get_device_of(sequence_tensor)
+            max_batch_span_width, device
         ).view(1, 1, -1)
         # Shape: (batch_size, num_spans, max_batch_span_width)
         # This is a broadcasted comparison - for each span we are considering,
@@ -85,7 +87,7 @@ class SelfAttentiveSpanExtractor(nn.Module):
         span_indices = torch.nn.functional.relu(raw_span_indices.float()).long()
 
         # Shape: (batch_size * num_spans * max_batch_span_width)
-        flat_span_indices = flatten_and_batch_shift_indices(span_indices, sequence_tensor.size(1))
+        flat_span_indices = flatten_and_batch_shift_indices(span_indices, sequence_tensor.size(1), device)
 
         # Shape: (batch_size, num_spans, max_batch_span_width, embedding_dim)
         span_embeddings = batched_index_select(sequence_tensor, span_indices, flat_span_indices)
@@ -271,7 +273,7 @@ def batched_index_select(
     return selected_targets
 
 
-def flatten_and_batch_shift_indices(indices: torch.Tensor, sequence_length: int) -> torch.Tensor:
+def flatten_and_batch_shift_indices(indices: torch.Tensor, sequence_length: int, device) -> torch.Tensor:
     """
     This is a subroutine for :func:`~batched_index_select`. The given ``indices`` of size
     ``(batch_size, d_1, ..., d_n)`` indexes into dimension 2 of a target tensor, which has size
@@ -302,7 +304,7 @@ def flatten_and_batch_shift_indices(indices: torch.Tensor, sequence_length: int)
     offset_indices : ``torch.LongTensor``
     """
     # Shape: (batch_size)
-    offsets = get_range_vector(indices.size(0), get_device_of(indices)) * sequence_length
+    offsets = get_range_vector(indices.size(0), device) * sequence_length
     for _ in range(len(indices.size()) - 1):
         offsets = offsets.unsqueeze(1)
 
@@ -315,13 +317,15 @@ def flatten_and_batch_shift_indices(indices: torch.Tensor, sequence_length: int)
 
 
 # noinspection PyUnresolvedReferences
-def get_range_vector(size: int, device: int) -> torch.Tensor:
+def get_range_vector(size: int, device) -> torch.Tensor:
     """
     Returns a range vector with the desired size, starting at 0. The CUDA implementation
     is meant to avoid copy data from CPU to GPU.
     """
-    if device > -1:
+    if device == 'cuda':
         return torch.cuda.LongTensor(size, device=device).fill_(1).cumsum(0) - 1
+    elif device == 'tpu':
+        return torch.arange(0, size, dtype=torch.long).to(xm.xla_device())
     else:
         return torch.arange(0, size, dtype=torch.long)
 

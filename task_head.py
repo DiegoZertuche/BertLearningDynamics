@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from allennlp_mod import SelfAttentiveSpanExtractor
 from classifier import Classifier
 import numpy as np
+import torch_xla.core.xla_model as xm
 
 
 class EdgeClassifierModule(nn.Module):
@@ -25,7 +26,7 @@ class EdgeClassifierModule(nn.Module):
         are negative)
     """
 
-    def __init__(self, task_params):
+    def __init__(self, task_params, device):
         super(EdgeClassifierModule, self).__init__()
         # Set config options needed for forward pass.
         self.span_pooling = task_params["span_pooling"]
@@ -34,10 +35,18 @@ class EdgeClassifierModule(nn.Module):
         self.n_spans = task_params['n_spans']
         self.n_classes = task_params['n_classes']
         self.loss_type = 'sigmoid'
+        self.device = device
 
         # Span extractor, shared for both span1 and span2.
-        self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim)
-        self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim)
+        if self.device == 'cuda':
+            self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim).to('cuda')
+            self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim).to('cuda')
+        elif self.device == 'tpu':
+            self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim).to(xm.xla_device())
+            self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim).to(xm.xla_device())
+        else:
+            self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim)
+            self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim)
         self.classifier = Classifier.from_params(self.proj_dim*self.n_spans, self.n_classes, task_params)
 
     def label_processing(self, labels):
@@ -48,7 +57,7 @@ class EdgeClassifierModule(nn.Module):
             binary_labels.append(binary_label_ids)
         return torch.tensor(binary_labels)
 
-    def forward(self, batch, sent_mask, predict, is_cuda):
+    def forward(self, batch, sent_mask, predict, device):
         """ Run forward pass.
         Expects batch to have the following entries:
             'batch1' : [batch_size, max_len, ??]
@@ -77,8 +86,8 @@ class EdgeClassifierModule(nn.Module):
 
         _kw = dict(sequence_mask=sent_mask.long(), span_indices_mask=span_mask.long())
         # span1_emb and span2_emb are [batch_size, num_targets, span_repr_dim]
-        span1_embeddings = self.span_attention_extractor(batch['batch1'], batch["span1s"])
-        span2_embeddings = self.span_attention_extractor_2(batch['batch1'], batch["span2s"])
+        span1_embeddings = self.span_attention_extractor(batch['batch1'], batch["span1s"], device)
+        span2_embeddings = self.span_attention_extractor_2(batch['batch1'], batch["span2s"], device)
 
         span_embeddings = torch.cat([span1_embeddings, span2_embeddings], dim=-1)
         masked_span_embeddings = span_embeddings[span_mask, :]
@@ -86,10 +95,7 @@ class EdgeClassifierModule(nn.Module):
 
         logits = self.classifier(masked_span_embeddings)
         out["logits"] = logits
-        if is_cuda:
-            binary_labels = self.label_processing(masked_labels).to('cuda')
-        else:
-            binary_labels = self.label_processing(masked_labels)
+        binary_labels = torch.nn.functional.one_hot(masked_labels, self.n_classes)
         out["labels"] = binary_labels
 
         # Compute loss if requested.
