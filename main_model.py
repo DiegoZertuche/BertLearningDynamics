@@ -12,9 +12,9 @@ class MainModel(nn.Module):
         self.model_params = model_params
         self.task_params = task_params
         self.encoder = base_model.BaseModel(model_params)
-        self.task_params['d_hidden'] = self.encoder.get_output_dim()
-        self.head = task_head.EdgeClassifierModule(task_params)
         self.device = device
+        self.task_params['d_hidden'] = self.encoder.get_output_dim()
+        self.head = task_head.EdgeClassifierModule(self.task_params, self.device)
         if self.device == 'cuda':
             self.encoder.to('cuda')
             self.encoder.to('cuda')
