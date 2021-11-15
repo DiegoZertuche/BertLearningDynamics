@@ -3,14 +3,19 @@ import torch
 import pandas as pd
 from functools import partial
 import numpy as np
+import boto3
+import awswrangler as wr
 
 
 def get_map_label_to_idx(file_name):
     mapper = {}
-    with open(file_name) as fp:
-        lines = fp.readlines()
-        for i, line in enumerate(lines):
-            mapper[line.strip('\n')] = i
+    s3_client = boto3.client(service_name='s3')
+    # get S3 object
+    result = s3_client.get_object(Bucket='multiberts-capstone-2021', Key=file_name) 
+    #Read a text file line by line using splitlines object
+    for i, line in enumerate(result["Body"].read().splitlines()):
+        each_line = line.decode('utf-8')
+        mapper[each_line.strip('\n')] = i
 
     return mapper
 
@@ -79,8 +84,12 @@ def load_span_data(file_name, file_name_retokenized, label_fn=None, has_labels=T
     Returns:
         List of dictionaries of the aligned spans and tokenized text.
     """
-    retokenized_rows = pd.read_json(file_name_retokenized, lines=True)
-    rows = pd.read_json(file_name, lines=True)
+    
+    retokenized_rows = wr.s3.read_json(path=[file_name_retokenized], lines=True)
+    rows = wr.s3.read_json(path=[file_name], lines=True)
+    bools = rows['targets'].apply(lambda x: len(x) != 0)
+    rows = rows[bools]
+    retokenized_rows = retokenized_rows[bools]
     # realign spans
     retokenized_rows['targets'] = retokenized_rows['targets'].apply(lambda x: realign_spans(x))
     if has_labels is False:
@@ -101,8 +110,10 @@ class MyDataset(torch.utils.data.Dataset):
         self.span1s = [[info['span1'] for info in x['targets']] for x in self.rows]
         self.span2s = [[info['span2'] for info in x['targets']] for x in self.rows]
         self.mapper = get_map_label_to_idx(filename_labels)
+        print(self.mapper)
         self.label_num = len(self.mapper)
         self.labels = [[self.mapper[info['label']] for info in x['targets']] for x in self.rows]
+            
 
     def __len__(self):
         return len(self.rows)
