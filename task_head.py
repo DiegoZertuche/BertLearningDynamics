@@ -41,13 +41,17 @@ class EdgeClassifierModule(nn.Module):
         if self.device == 'cuda':
             self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim).to('cuda')
             self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim).to('cuda')
+            self.classifier = Classifier.from_params(self.proj_dim * self.n_spans, self.n_classes, task_params).to(
+                'cuda')
         elif self.device == 'tpu':
             self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim).to(xm.xla_device())
             self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim).to(xm.xla_device())
+            self.classifier = Classifier.from_params(self.proj_dim * self.n_spans, self.n_classes, task_params).to(
+                xm.xla_device())
         else:
             self.span_attention_extractor = SelfAttentiveSpanExtractor(self.proj_dim)
             self.span_attention_extractor_2 = SelfAttentiveSpanExtractor(self.proj_dim)
-        self.classifier = Classifier.from_params(self.proj_dim*self.n_spans, self.n_classes, task_params)
+            self.classifier = Classifier.from_params(self.proj_dim * self.n_spans, self.n_classes, task_params)
 
     def label_processing(self, labels):
         binary_labels = []
