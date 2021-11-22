@@ -1,21 +1,32 @@
 import os
+import json
 import torch
 import pandas as pd
 from functools import partial
 import numpy as np
+from google.cloud import storage
+
+
+storage_client = storage.Client()
+bucket = storage_client.get_bucket('capstone2021')
 
 
 def get_map_label_to_idx(file_name):
+    storage_client = storage.Client()
     mapper = {}
-    with open(file_name) as fp:
-        lines = fp.readlines()
-        for i, line in enumerate(lines):
-            mapper[line.strip('\n')] = i
+    bucket = storage_client.get_bucket('capstone2021')
+    blob = bucket.blob(file_name)
+    result = blob.download_as_string()
+    #Read a text file line by line using splitlines object
+    result = result.decode(encoding="utf-8", errors="ignore")
+    for i, line in enumerate(result.splitlines()):
+        mapper[line] = i
 
     return mapper
 
 
-def realign_spans(record):
+
+def realign_spans(record, n_spans=2):
     """
     Builds the indices alignment while also tokenizing the input
     piece by piece.
@@ -46,7 +57,10 @@ def realign_spans(record):
     """
     for i, target in enumerate(record):
         span1 = target["span1"]
-        span2 = target["span2"]
+        if n_spans < 2:
+            span2 = target["span1"]
+        else:
+            span2 = target["span2"]
 
         # align spans and make them end inclusive
         span1 = [span1[0]+1, span1[1]]
@@ -57,8 +71,7 @@ def realign_spans(record):
 
     return record
 
-
-def load_span_data(file_name, file_name_retokenized, label_fn=None, has_labels=True):
+def load_span_data(file_name, file_name_retokenized, label_fn=None, has_labels=True, n_spans=2):
     """
     Load a span-related task file in .jsonl format, does re-alignment of spans, and tokenizes
     the text.
@@ -79,10 +92,20 @@ def load_span_data(file_name, file_name_retokenized, label_fn=None, has_labels=T
     Returns:
         List of dictionaries of the aligned spans and tokenized text.
     """
-    retokenized_rows = pd.read_json(file_name_retokenized, lines=True)
-    rows = pd.read_json(file_name, lines=True)
+    retokenized_blob = bucket.blob(file_name_retokenized)
+    blob = bucket.blob(file_name)
+    retokenized_result = retokenized_blob.download_as_string().decode(encoding="utf-8", errors="ignore")
+    result = blob.download_as_string().decode(encoding="utf-8", errors="ignore")
+    retokenized_lines = [json.loads(line) for line in retokenized_result.splitlines()]
+    lines = [json.loads(line) for line in result.splitlines()]
+
+    retokenized_rows = pd.DataFrame(retokenized_lines)
+    rows = pd.DataFrame(lines)
+    bools = rows['targets'].apply(lambda x: len(x) != 0)
+    rows = rows[bools]
+    retokenized_rows = retokenized_rows[bools]
     # realign spans
-    retokenized_rows['targets'] = retokenized_rows['targets'].apply(lambda x: realign_spans(x))
+    retokenized_rows['targets'] = retokenized_rows['targets'].apply(lambda x: realign_spans(x, n_spans))
     if has_labels is False:
         retokenized_rows["label"] = 0
     elif label_fn is not None:
@@ -91,12 +114,12 @@ def load_span_data(file_name, file_name_retokenized, label_fn=None, has_labels=T
     retokenized_rows["text"] = rows["text"]
     return list(retokenized_rows.T.to_dict().values())
 
-
 class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, filename, filename_retokenized, filename_labels, label_fn=None):
+    def __init__(self, filename, filename_retokenized, filename_labels, label_fn=None, n_spans=2):
         self.filename = filename
         self.filename_retokenized = filename_retokenized
-        self.rows = load_span_data(self.filename, self.filename_retokenized, label_fn)
+        self.n_spans = n_spans
+        self.rows = load_span_data(self.filename, self.filename_retokenized, label_fn, n_spans=self.n_spans)
         self.texts = [x['text'] for x in self.rows]
         self.span1s = [[info['span1'] for info in x['targets']] for x in self.rows]
         self.span2s = [[info['span2'] for info in x['targets']] for x in self.rows]
