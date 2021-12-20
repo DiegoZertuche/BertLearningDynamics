@@ -2,8 +2,8 @@
 
 ## Authors
 
-* Diego Zertuche
-* Benjamin Liu
+* Diego Zertuche (diego_zertucheserna@g.harvard.edu)
+* Benjamin Liu (tliu@g.harvard.edu)
 
 ## Paper
 ---
