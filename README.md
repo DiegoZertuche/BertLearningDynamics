@@ -71,7 +71,7 @@ dev_ds = MyDataset(dev_task_filepath, dev_task_filepath + '.retokenized.bert-bas
 
 A working version of the linguistic probing code base that can handle TPUs can be found in the git branch `tpu`.
 
-A working example of an experiment run can be found on the notebook `example.ipbyn`.
+A working example of an experiment run can be found on the [notebook](https://github.com/DiegoZertuche/BertLearningDynamics/blob/main/edge_probing/RunLinguisticProbe.ipynb) found in the edge_probe module.
 
 
 ### Lama Probes
