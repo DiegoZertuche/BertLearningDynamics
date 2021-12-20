@@ -1,5 +1,11 @@
 # BertLearningDynamics
 
+## Authors
+---
+
+* Diego Zertuche
+* Benjamin Liu
+
 ## Paper
 ---
 [How Does BERT Learn?](https://github.com/DiegoZertuche/BertLearningDynamics/blob/main/How%20Does%20Bert%20Learn.pdf)
