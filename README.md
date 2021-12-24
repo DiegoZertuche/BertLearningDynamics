@@ -20,7 +20,7 @@ We find that as pretraining keeps going in the BERT model, BERT learns to separa
 ## Documentation
 ---
 
-To replicate the experiments of our paper, we have created a repositor containing most of the code used. The code base and experiments are located in the `edge-probing`, `lama_probing`, `lama_probing_layer_level`. The folder `data` contains the data to obtain the datasets used for the experiments, with exception of [Ontonotes 5.0](https://catalog.ldc.upenn.edu/LDC2013T19), used for some of the linguistic tasks,  and the [ChemProt](https://biocreative.bioinformatics.udel.edu/news/corpora/chemprot-corpus-biocreative-vi/) dataset, used for the Task Adaptation experiments, as these are datasets only available upon request.
+To replicate the experiments of our paper, we have created a repository containing most of the code used. The code base and experiments are located in the `edge-probing`, `lama_probing`, `lama_probing_layer_level`. The folder `data` contains the data to obtain the datasets used for the experiments, with exception of [Ontonotes 5.0](https://catalog.ldc.upenn.edu/LDC2013T19), used for some of the linguistic tasks,  and the [ChemProt](https://biocreative.bioinformatics.udel.edu/news/corpora/chemprot-corpus-biocreative-vi/) dataset, used for the Task Adaptation experiments, as these are datasets only available upon request.
 
 ### Environment
 ---
